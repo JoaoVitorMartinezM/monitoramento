@@ -28,7 +28,7 @@ public class ItemMonitorado {
 
     //@Temporal(TemporalType.TIME)
     //private Instant hora;
-
+    private String hostname;
     private String cpu;
     private String memoria;
     private String disco;
@@ -38,5 +38,6 @@ public class ItemMonitorado {
     private Integer ramPentes;
     private String ramDetalhes;
     private String armazenamento;
+    private String localidade;
 
 }
