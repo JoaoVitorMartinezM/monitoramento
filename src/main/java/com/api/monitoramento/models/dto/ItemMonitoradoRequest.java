@@ -13,7 +13,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemMonitoradoRequest {
-    private Cliente cliente;
+    private String cliente;
     private Instant datahora;
     private String hostname;
     private String cpu;
