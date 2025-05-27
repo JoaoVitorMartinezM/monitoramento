@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -23,17 +24,12 @@ public class ItemMonitorado {
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "itemMonitorado", cascade = CascadeType.ALL)
+    private List<ItemMetrica> metricas;
+
     @Temporal(TemporalType.TIMESTAMP)
     private Instant datahora;
-
-    //@Temporal(TemporalType.TIME)
-    //private Instant hora;
     private String hostname;
-    private String cpu;
-    private String memoria;
-    private String disco;
-    private String downloadKbps;
-    private String uploadKbps;
     private String cpuModelo;
     private Integer ramPentes;
     private String ramDetalhes;

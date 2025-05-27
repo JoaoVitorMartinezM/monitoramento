@@ -1,6 +1,7 @@
 package com.api.monitoramento.services;
 
 import com.api.monitoramento.models.Cliente;
+import com.api.monitoramento.models.ItemMetrica;
 import com.api.monitoramento.models.ItemMonitorado;
 import com.api.monitoramento.models.Localidade;
 import com.api.monitoramento.models.dto.ItemMonitoradoRequest;
@@ -9,6 +10,7 @@ import com.api.monitoramento.models.dto.LocalidadeResponse;
 import com.api.monitoramento.repositories.ClienteRepository;
 import com.api.monitoramento.repositories.ItensMonitoradosRepository;
 import com.api.monitoramento.repositories.LocalidadeRepository;
+import com.api.monitoramento.repositories.MetricaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ public class ItensMonitoradosService {
     private final ItensMonitoradosRepository itensMonitoradosRepository;
     private final ClienteRepository clientesRepository;
     private final LocalidadeRepository localidadeRepository;
+    private final MetricaRepository metricaRepository;
     private final LocalidadeService localidadeService;
 
     public List<ItensMonitoradosResponse> listarItensMonitorados() {
@@ -49,14 +52,28 @@ public class ItensMonitoradosService {
     }
 
     public Optional<ItensMonitoradosResponse> criarItemMonitorado(ItemMonitoradoRequest itemMonitoradoRequest) {
-        ItemMonitorado itemMonitorado = new ItemMonitorado();
-        ItensMonitoradosResponse itemMonitoradoResponse = new ItensMonitoradosResponse();
+
         Optional<Cliente> clienteOpt = clientesRepository.findByNome(itemMonitoradoRequest.getCliente().toUpperCase());
         if (clienteOpt.isEmpty()){
             return Optional.empty();
         }
-        Cliente cliente = clienteOpt.get();
+
+        ItemMonitorado itemMonitorado = new ItemMonitorado();
+        ItemMetrica itemMetrica = new ItemMetrica();
+        Cliente cliente = new Cliente();
+        ItensMonitoradosResponse itemMonitoradoResponse = new ItensMonitoradosResponse();
         BeanUtils.copyProperties(itemMonitoradoRequest, itemMonitorado);
+        Optional<ItemMonitorado> itemMonitoradoExists = itensMonitoradosRepository.findByHostname(itemMonitorado.getHostname());
+        if(itemMonitoradoExists.isPresent()){
+            itemMonitorado = itemMonitoradoExists.get();
+            BeanUtils.copyProperties(itemMonitoradoRequest, itemMetrica);
+            itemMetrica.setItemMonitorado(itemMonitorado);
+            metricaRepository.save(itemMetrica);
+
+            return Optional.of(new ItensMonitoradosResponse(itemMonitorado.getUuid(), itemMonitorado.getCliente().toString(), itemMonitorado.getHostname()));
+        }
+
+        cliente = clienteOpt.get();
         itemMonitorado.setCliente(cliente);
         if (!localidadeRepository.existsByNome(itemMonitoradoRequest.getLocalidade())){
             localidadeService.criarLocalidade(cliente.getNome(), itemMonitoradoRequest.getLocalidade());

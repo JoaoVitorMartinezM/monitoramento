@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 
+@CrossOrigin
 @RestController
 @RequestMapping("clientes")
 @RequiredArgsConstructor

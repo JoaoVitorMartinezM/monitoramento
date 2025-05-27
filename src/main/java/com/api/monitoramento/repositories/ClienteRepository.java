@@ -13,5 +13,6 @@ public interface ClienteRepository extends JpaRepository<Cliente, UUID> {
 
     boolean existsByNome(String nome);
 
+
     Optional<Cliente> findByNome(String nome);
 }
