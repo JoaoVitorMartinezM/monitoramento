@@ -7,6 +7,7 @@ import com.api.monitoramento.models.Localidade;
 import com.api.monitoramento.models.dto.ItemMonitoradoRequest;
 import com.api.monitoramento.models.dto.ItensMonitoradosResponse;
 import com.api.monitoramento.models.dto.LocalidadeResponse;
+import com.api.monitoramento.models.dto.MetricaRequest;
 import com.api.monitoramento.repositories.ClienteRepository;
 import com.api.monitoramento.repositories.ItensMonitoradosRepository;
 import com.api.monitoramento.repositories.LocalidadeRepository;
@@ -28,6 +29,7 @@ public class ItensMonitoradosService {
     private final LocalidadeRepository localidadeRepository;
     private final MetricaRepository metricaRepository;
     private final LocalidadeService localidadeService;
+    private final MetricaService metricaService;
 
     public List<ItensMonitoradosResponse> listarItensMonitorados() {
         List<ItemMonitorado> itensMonitorados = itensMonitoradosRepository.findAll();
@@ -60,28 +62,36 @@ public class ItensMonitoradosService {
 
         ItemMonitorado itemMonitorado = new ItemMonitorado();
         ItemMetrica itemMetrica = new ItemMetrica();
+        MetricaRequest metricaRequest = new MetricaRequest();
         Cliente cliente = new Cliente();
         ItensMonitoradosResponse itemMonitoradoResponse = new ItensMonitoradosResponse();
         BeanUtils.copyProperties(itemMonitoradoRequest, itemMonitorado);
         Optional<ItemMonitorado> itemMonitoradoExists = itensMonitoradosRepository.findByHostname(itemMonitorado.getHostname());
+
         if(itemMonitoradoExists.isPresent()){
             itemMonitorado = itemMonitoradoExists.get();
-            BeanUtils.copyProperties(itemMonitoradoRequest, itemMetrica);
-            itemMetrica.setItemMonitorado(itemMonitorado);
-            metricaRepository.save(itemMetrica);
-
-            return Optional.of(new ItensMonitoradosResponse(itemMonitorado.getUuid(), itemMonitorado.getCliente().toString(), itemMonitorado.getHostname()));
+            BeanUtils.copyProperties(itemMonitoradoRequest, metricaRequest);
+            metricaRequest.setItemMonitoradoId(itemMonitorado.getUuid());
+            metricaService.criarMetrica(metricaRequest);
+            return Optional.of(new ItensMonitoradosResponse(itemMonitorado.getUuid(), itemMonitorado.getCliente().getNome(), itemMonitorado.getHostname()));
         }
 
         cliente = clienteOpt.get();
         itemMonitorado.setCliente(cliente);
-        if (!localidadeRepository.existsByNome(itemMonitoradoRequest.getLocalidade())){
+        System.out.println("Chegou aquiiiiiii");
+        System.out.println(!localidadeRepository.existsByNome(itemMonitoradoRequest.getLocalidade()));
+        if (localidadeRepository.existsByNome(itemMonitoradoRequest.getLocalidade())){
+            System.out.println("Entrou aquiiiiiii");
             localidadeService.criarLocalidade(cliente.getNome(), itemMonitoradoRequest.getLocalidade());
         }
         itemMonitorado.setLocalidade(itemMonitoradoRequest.getLocalidade());
 
         ItemMonitorado save = itensMonitoradosRepository.save(itemMonitorado);
         BeanUtils.copyProperties(save, itemMonitoradoResponse);
+        BeanUtils.copyProperties(itemMonitoradoRequest, metricaRequest);
+        metricaRequest.setItemMonitoradoId(save.getUuid());
+        metricaService.criarMetrica(metricaRequest);
+        itemMonitoradoResponse.setNomeCliente(save.getCliente().getNome());
 
         return Optional.of(itemMonitoradoResponse);
     }

@@ -35,8 +35,11 @@ public class ItensMonitoradosController {
     @PostMapping
     ResponseEntity<ItensMonitoradosResponse> criarItemMonitorado(@RequestBody ItemMonitoradoRequest itemMonitoradoRequest){
         Optional<ItensMonitoradosResponse> itemMonitoradoResponseOpt = service.criarItemMonitorado(itemMonitoradoRequest);
-        URI location = URI.create("/api/v1/clientes/" + itemMonitoradoResponseOpt.getUuid().toString());
-        return ResponseEntity.created(location).body(itemMonitoradoResponseOpt);
+        if (itemMonitoradoResponseOpt.isEmpty())
+            return ResponseEntity.badRequest().build();
+        ItensMonitoradosResponse itensMonitoradosResponse = itemMonitoradoResponseOpt.get();
+        URI location = URI.create("/api/v1/clientes/" + itensMonitoradosResponse.getUuid().toString());
+        return ResponseEntity.created(location).body(itensMonitoradosResponse);
     }
 
 

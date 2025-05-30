@@ -1,4 +1,23 @@
 package com.api.monitoramento.models.dto;
 
-public record MetricaRequest(String cpu, String memoria, String disco, String downloadKbps, String uploadKbps) {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.UUID;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class MetricaRequest {
+    private UUID itemMonitoradoId;
+    private String cpu;
+    private String memoria;
+    private String disco;
+    private String downloadKbps;
+    private String uploadKbps;
+
+
 }

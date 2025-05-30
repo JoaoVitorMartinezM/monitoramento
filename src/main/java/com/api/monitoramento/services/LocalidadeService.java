@@ -23,6 +23,7 @@ public class LocalidadeService {
     public Optional<LocalidadeResponse> criarLocalidade(String nomeCliente, String nomeLocalidade) {
         boolean existsByNome = clienteRepository.existsByNome(nomeCliente);
         if (existsByNome){
+            System.out.println("Entrou aquiiiiiii");
             Cliente cliente = clienteRepository.findByNome(nomeCliente.toUpperCase()).get();
             Localidade localidade = new Localidade();
             localidade.setNome(nomeLocalidade);
